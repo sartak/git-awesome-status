@@ -15,11 +15,10 @@ if ($wc) {
     print $wc;
 }
 
-my @files = `git status --porcelain`;
-my $untracked_files = join '', map { s/^\?\?//; $_ } grep { /^\?\?/ } @files;
+my $untracked_files = `git ls-files --exclude-per-directory=.gitignore --exclude-from=.git/info/exclude --others`;
 if ($untracked_files) {
     print "Untracked files:\n";
-    print $untracked_files;
+    print map { " $_\n" } split "\n", $untracked_files;
 }
 
 
