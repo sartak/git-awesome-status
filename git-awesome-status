@@ -15,3 +15,11 @@ if ($wc) {
     print $wc;
 }
 
+my @files = `git status --porcelain`;
+my $untracked_files = join '', map { s/^\?\?//; $_ } grep { /^\?\?/ } @files;
+if ($untracked_files) {
+    print "Untracked files:\n";
+    print $untracked_files;
+}
+
+
