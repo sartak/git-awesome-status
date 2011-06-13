@@ -1,0 +1,17 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+
+my $index = `git diff --color --stat --cached`;
+if ($index) {
+    print "Index:\n";
+    print $index;
+}
+
+my $wc = `git diff --color --stat`;
+
+if ($wc) {
+    print "Working tree:\n";
+    print $wc;
+}
+
