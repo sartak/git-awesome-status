@@ -2,23 +2,26 @@
 use strict;
 use warnings;
 
-my $index = `git diff --color --stat --cached`;
-if ($index) {
-    print "Index:\n";
-    print $index;
+my @index = `git diff --color --stat --cached`;
+if (@index) {
+    print "\e[0;33mIndex:\e[m\n";
+    print @index;
 }
 
-my $wc = `git diff --color --stat`;
+my @wc = `git diff --color --stat`;
 
-if ($wc) {
-    print "Working tree:\n";
-    print $wc;
+if (@wc) {
+    print "\e[1;31mWorking tree:\e[m\n";
+    s/(\S+)/\e[1;37m$1\e[m/ for @wc[0 .. $#wc-1];
+    print @wc;
 }
 
-my $untracked_files = `git ls-files -z --exclude-per-directory=.gitignore --exclude-from=.git/info/exclude --others --full-name`;
+my $untracked_files = `git ls-files -z --exclude-standard --others --full-name`;
 if ($untracked_files) {
-    print "Untracked files:\n";
-    print map { " $_\n" } split "\0", $untracked_files;
+    print "\e[1;30mUntracked files:\e[m\n";
+    my @untracked = map { " $_\n" } split "\0", $untracked_files;
+    s/(\S+)/\e[1;37m$1\e[m/ for @untracked;
+    print @untracked;
 }
 
 
