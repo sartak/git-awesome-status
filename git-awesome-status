@@ -21,10 +21,15 @@ my %code_for = (
         return `git diff --color --stat --cached`;
     },
     'Local branches' => sub {
-        my @branches = map { s/^\s+//; s/\s+$//; s/^\*\s*//; $_ } split /\n/, `git branch -l`;
+        my @branches = map { s/\s+$//; $_ } split /\n/, `git branch -l --color`;
         my %branch_output;
         for my $branch (@branches) {
-            my $output = `git rev-list $branch\@{u}..$branch 2>&1`;
+            my $branchname = $branch;
+            $branchname =~ s/^[\s*]+//;
+            # strip ansi colors, ew
+            # http://stackoverflow.com/questions/7394889/best-way-to-remove-ansi-color-escapes-in-unix
+            $branchname =~ s/\e\[[\d;]*[a-zA-Z]//g;
+            my $output = `git rev-list $branchname\@{u}..$branchname 2>&1`;
             if ($output =~ /No upstream branch found/ || $output =~ /unknown revision/) {
                 $branch_output{$branch} = "No upstream";
                 next;
