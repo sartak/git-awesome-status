@@ -40,7 +40,7 @@ my %code_for = (
                 $status .= "\e[32m+$lines\e[m";
             }
 
-            my $reverse = `git rev-list $branch..$branch\@{u} 2>&1`;
+            my $reverse = `git rev-list $branchname..$branchname\@{u} 2>&1`;
             if (my $reverse_lines = $reverse =~ tr/\n/\n/) {
                 $status .= "\e[31m-$reverse_lines\e[m";
             }
