@@ -14,13 +14,13 @@ Untracked files:
  README.md
 
 Working tree:
- git-awesome-status |   30 <span color="#009900">+++++++++++++++++++++++++++++</span><span color="#990000">-</span>
+ git-awesome-status |   30 +++++++++++++++++++++++++++++-
  1 files changed, 29 insertions(+), 1 deletions(-)
 
 Index:
- git-awesome-status |    5 <span color="#009900">+++++</span>
+ git-awesome-status |    5 +++++
  1 files changed, 5 insertions(+), 0 deletions(-)
 
 Local branches:
- master: <span color="#009900">+1</span>
+ master: +1
 </pre>
