@@ -49,7 +49,7 @@ for my $branch (@branches) {
 }
 
 if (%branch_output) {
-    say "\e[0;33mLocal branches:\e[m";
+    say "\e[0;36mLocal branches:\e[m";
     for my $branch (sort keys %branch_output) {
         say " $branch: $branch_output{$branch}"
     }
