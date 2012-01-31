@@ -36,12 +36,12 @@ for my $branch (@branches) {
 
     my $status;
     if (my $lines = $output =~ tr/\n/\n/) {
-        $status .= "+$lines";
+        $status .= "\e[32m+$lines\e[m";
     }
 
     my $reverse = `git rev-list $branch..$branch\@{u} 2>&1`;
     if (my $reverse_lines = $reverse =~ tr/\n/\n/) {
-        $status .= "-$reverse_lines";
+        $status .= "\e[31m-$reverse_lines\e[m";
     }
 
     $branch_output{$branch} = $status
