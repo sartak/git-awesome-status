@@ -22,34 +22,35 @@ my %code_for = (
     },
     'Local branches' => sub {
         my @branches = map { s/\s+$//; $_ } split /\n/, `git branch -l --color`;
-        my %branch_output;
+        my @output;
         for my $colored_name (@branches) {
             my $plain_name = $colored_name;
             $plain_name =~ s/^[\s*]+//;
             # strip ansi colors, ew
             # http://stackoverflow.com/questions/7394889/best-way-to-remove-ansi-color-escapes-in-unix
             $plain_name =~ s/\e\[[\d;]*[a-zA-Z]//g;
-            my $output = `git rev-list $plain_name\@{u}..$plain_name 2>&1`;
-            if ($output =~ /No upstream branch found/ || $output =~ /unknown revision/) {
-                $branch_output{$plain_name} = "No upstream";
+
+            my $status = `git rev-list $plain_name\@{u}..$plain_name 2>&1`;
+            if ($status =~ /No upstream branch found/ || $status =~ /unknown revision/) {
+                push @output, " $colored_name: No upstream\n";
                 next;
             }
 
-            my $status;
-            if (my $lines = $output =~ tr/\n/\n/) {
-                $status .= "\e[32m+$lines\e[m";
+            my $diff;
+            if (my $lines = $status =~ tr/\n/\n/) {
+                $diff .= "\e[32m+$lines\e[m";
             }
 
             my $reverse = `git rev-list $plain_name..$plain_name\@{u} 2>&1`;
             if (my $reverse_lines = $reverse =~ tr/\n/\n/) {
-                $status .= "\e[31m-$reverse_lines\e[m";
+                $diff .= "\e[31m-$reverse_lines\e[m";
             }
 
-            $branch_output{$plain_name} = "$colored_name: $status"
-                if $status;
+            push @output, " $colored_name: $diff\n"
+                if $diff;
         }
 
-        return map { " $branch_output{$_}\n" } sort keys %branch_output;
+        return @output;
     },
 );
 
