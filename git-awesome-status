@@ -1,24 +1,25 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
+use feature 'say';
 
 my @index = `git diff --color --stat --cached`;
 if (@index) {
-    print "\e[0;33mIndex:\e[m\n";
+    say "\e[0;33mIndex:\e[m";
     print @index;
 }
 
 my @wc = `git diff --color --stat`;
 
 if (@wc) {
-    print "\e[1;31mWorking tree:\e[m\n";
+    say "\e[1;31mWorking tree:\e[m";
     s/(\S+)/\e[1;37m$1\e[m/ for @wc[0 .. $#wc-1];
     print @wc;
 }
 
 my $untracked_files = `git ls-files -z --exclude-standard --others --full-name`;
 if ($untracked_files) {
-    print "\e[1;30mUntracked files:\e[m\n";
+    say "\e[1;30mUntracked files:\e[m";
     my @untracked = map { " $_\n" } split "\0", $untracked_files;
     s/(\S+)/\e[1;37m$1\e[m/ for @untracked;
     print @untracked;
