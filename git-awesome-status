@@ -25,4 +25,32 @@ if ($untracked_files) {
     print @untracked;
 }
 
+my @branches = map { s/^\s+//; s/\s+$//; s/^\*\s*//; $_ } split /\n/, `git branch -l`;
+my %branch_output;
+for my $branch (@branches) {
+    my $output = `git rev-list $branch\@{u}..$branch 2>&1`;
+    if ($output =~ /No upstream branch found/ || $output =~ /unknown revision/) {
+        $branch_output{$branch} = "No upstream";
+        next;
+    }
 
+    my $status;
+    if (my $lines = $output =~ tr/\n/\n/) {
+        $status .= "+$lines";
+    }
+
+    my $reverse = `git rev-list $branch..$branch\@{u} 2>&1`;
+    if (my $reverse_lines = $reverse =~ tr/\n/\n/) {
+        $status .= "-$reverse_lines";
+    }
+
+    $branch_output{$branch} = $status
+        if $status;
+}
+
+if (%branch_output) {
+    say "\e[0;33mLocal branches:\e[m";
+    for my $branch (sort keys %branch_output) {
+        say " $branch: $branch_output{$branch}"
+    }
+}
