@@ -30,6 +30,8 @@ my %code_for = (
             # http://stackoverflow.com/questions/7394889/best-way-to-remove-ansi-color-escapes-in-unix
             $plain_name =~ s/\e\[[\d;]*[a-zA-Z]//g;
 
+            next if $plain_name eq '(no branch)';
+
             my $status = `git rev-list $plain_name\@{u}..$plain_name 2>&1`;
             if ($status =~ /No upstream branch found/ || $status =~ /unknown revision/) {
                 push @output, " $colored_name: No upstream\n";
