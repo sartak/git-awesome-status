@@ -2,51 +2,60 @@
 use strict;
 use warnings;
 
-my $untracked_files = `git ls-files -z --exclude-standard --others --full-name`;
-if ($untracked_files) {
-    print "\e[1;30mUntracked files:\e[m\n";
-    my @untracked = map { " $_\n" } split "\0", $untracked_files;
-    print @untracked;
-}
+my @order = (
+    'Untracked files',
+    'Working tree',
+    'Index',
+    'Local branches',
+);
 
-my @wc = `git diff --color --stat`;
-if (@wc) {
-    print "\e[1;31mWorking tree:\e[m\n";
-    print @wc;
-}
+my %code_for = (
+    'Untracked files' => sub {
+        my $untracked_files = `git ls-files -z --exclude-standard --others --full-name`;
+        return map { " $_\n" } split "\0", $untracked_files;
+    },
+    'Working tree' => sub {
+        return `git diff --color --stat`;
+    },
+    'Index' => sub {
+        return `git diff --color --stat --cached`;
+    },
+    'Local branches' => sub {
+        my @branches = map { s/^\s+//; s/\s+$//; s/^\*\s*//; $_ } split /\n/, `git branch -l`;
+        my %branch_output;
+        for my $branch (@branches) {
+            my $output = `git rev-list $branch\@{u}..$branch 2>&1`;
+            if ($output =~ /No upstream branch found/ || $output =~ /unknown revision/) {
+                $branch_output{$branch} = "No upstream";
+                next;
+            }
 
-my @index = `git diff --color --stat --cached`;
-if (@index) {
-    print "\e[0;33mIndex:\e[m\n";
-    print @index;
-}
+            my $status;
+            if (my $lines = $output =~ tr/\n/\n/) {
+                $status .= "\e[32m+$lines\e[m";
+            }
 
-my @branches = map { s/^\s+//; s/\s+$//; s/^\*\s*//; $_ } split /\n/, `git branch -l`;
-my %branch_output;
-for my $branch (@branches) {
-    my $output = `git rev-list $branch\@{u}..$branch 2>&1`;
-    if ($output =~ /No upstream branch found/ || $output =~ /unknown revision/) {
-        $branch_output{$branch} = "No upstream";
-        next;
-    }
+            my $reverse = `git rev-list $branch..$branch\@{u} 2>&1`;
+            if (my $reverse_lines = $reverse =~ tr/\n/\n/) {
+                $status .= "\e[31m-$reverse_lines\e[m";
+            }
 
-    my $status;
-    if (my $lines = $output =~ tr/\n/\n/) {
-        $status .= "\e[32m+$lines\e[m";
-    }
+            $branch_output{$branch} = $status
+                if $status;
+        }
 
-    my $reverse = `git rev-list $branch..$branch\@{u} 2>&1`;
-    if (my $reverse_lines = $reverse =~ tr/\n/\n/) {
-        $status .= "\e[31m-$reverse_lines\e[m";
-    }
+        return map { " $_: $branch_output{$_}\n" } sort keys %branch_output;
+    },
+);
 
-    $branch_output{$branch} = $status
-        if $status;
-}
+my $printed_block = 0;
+for my $component (@order) {
+    my @results = $code_for{$component}->();
+    next unless @results;
 
-if (%branch_output) {
-    print "\e[0;36mLocal branches:\e[m\n";
-    for my $branch (sort keys %branch_output) {
-        print " $branch: $branch_output{$branch}\n";
-    }
+    print "\n" if $printed_block;
+    $printed_block++;
+
+    print "$component:\n";
+    print @results;
 }
