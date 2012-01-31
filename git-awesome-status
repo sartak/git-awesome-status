@@ -1,11 +1,10 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use feature 'say';
 
 my $untracked_files = `git ls-files -z --exclude-standard --others --full-name`;
 if ($untracked_files) {
-    say "\e[1;30mUntracked files:\e[m";
+    print "\e[1;30mUntracked files:\e[m\n";
     my @untracked = map { " $_\n" } split "\0", $untracked_files;
     s/(\S+)/\e[1;37m$1\e[m/ for @untracked;
     print @untracked;
@@ -13,14 +12,14 @@ if ($untracked_files) {
 
 my @wc = `git diff --color --stat`;
 if (@wc) {
-    say "\e[1;31mWorking tree:\e[m";
+    print "\e[1;31mWorking tree:\e[m\n";
     s/(\S+)/\e[1;37m$1\e[m/ for @wc[0 .. $#wc-1];
     print @wc;
 }
 
 my @index = `git diff --color --stat --cached`;
 if (@index) {
-    say "\e[0;33mIndex:\e[m";
+    print "\e[0;33mIndex:\e[m\n";
     print @index;
 }
 
@@ -48,8 +47,8 @@ for my $branch (@branches) {
 }
 
 if (%branch_output) {
-    say "\e[0;36mLocal branches:\e[m";
+    print "\e[0;36mLocal branches:\e[m\n";
     for my $branch (sort keys %branch_output) {
-        say " $branch: $branch_output{$branch}"
+        print " $branch: $branch_output{$branch}\n";
     }
 }
