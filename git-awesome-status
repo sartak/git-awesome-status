@@ -10,6 +10,14 @@ my @order = (
     'Feature branches',
 );
 
+my $branches;
+sub branches {
+    unless ($branches) {
+        $branches = [ map { s/\s+$//; $_ } split /\n/, `git branch -l --color` ];
+    }
+    return @$branches;
+}
+
 my %code_for = (
     'Untracked files' => sub {
         my $untracked_files = `git ls-files -z --exclude-standard --directory --others --full-name`;
@@ -28,9 +36,8 @@ my %code_for = (
         };
     },
     'Local branches' => sub {
-        my @branches = map { s/\s+$//; $_ } split /\n/, `git branch -l --color`;
         my @output;
-        for my $colored_name (@branches) {
+        for my $colored_name (branches) {
             my $plain_name = $colored_name;
             $plain_name =~ s/^[\s*]+//;
             # strip ansi colors, ew
@@ -64,13 +71,11 @@ my %code_for = (
         };
     },
     'Feature branches' => sub {
-        my @branches = map { s/\s+$//; $_ } split /\n/, `git branch -l --color`;
-
         chomp(my $integration = `git config awesome-status.integration`);
         $integration ||= 'master';
 
         my @output;
-        for my $colored_name (@branches) {
+        for my $colored_name (branches) {
             my $plain_name = $colored_name;
             $plain_name =~ s/^[\s*]+//;
             # strip ansi colors, ew
