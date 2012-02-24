@@ -96,7 +96,7 @@ my %code_for = (
         }
 
         return {
-            component => "Feature branches (off $integration)",
+            component => "Feature branches (merging into $integration)",
             output    => \@output,
         };
     },
