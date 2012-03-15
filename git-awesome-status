@@ -72,7 +72,10 @@ my %code_for = (
     },
     'Feature branches' => sub {
         chomp(my $integration = `git config awesome-status.integration`);
-        $integration ||= 'master';
+        if (!$integration) {
+            warn "The feature branches status expects the integration branch to be configured. Please set the integration branch for this project like:\n    git config --add awesome-status.integration release-2.1.0\n";
+            return;
+        }
 
         my @output;
         for my $colored_name (branches) {
