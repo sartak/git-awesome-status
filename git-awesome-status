@@ -78,7 +78,7 @@ my %code_for = (
         }
 
         if (`git rev-parse $integration 2>&1` =~ /unknown revision/) {
-            warn "Your configured integration branch ($integration) does not exist.\n";
+            warn "Your configured integration branch ($integration) does not exist. Please create it or change the integration branch for this project like:\n    git config --replace-all awesome-status.integration release-2.1.1\n";
             return;
         }
 
