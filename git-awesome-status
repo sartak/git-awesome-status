@@ -77,6 +77,11 @@ my %code_for = (
             return;
         }
 
+        if (`git rev-parse $integration 2>&1` =~ /unknown revision/) {
+            warn "Your configured integration branch ($integration) does not exist.\n";
+            return;
+        }
+
         my @output;
         for my $colored_name (branches) {
             my $plain_name = $colored_name;
